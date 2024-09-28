@@ -146,3 +146,6 @@ class ShapeDetector:
 
     def get_radian(self, res: ShapeDetectResult):
         return get_angle_from_rect(res.cnt)
+
+    def get_type(self, res: ShapeDetectResult) -> str:
+        return res.object_type.name

@@ -12,8 +12,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_AiKit_UI(object):
     def setupUi(self, AiKit_UI):
         AiKit_UI.setObjectName("AiKit_UI")
-        AiKit_UI.resize(1200, 820)
-        AiKit_UI.setMaximumSize(QtCore.QSize(1200, 820))
+        AiKit_UI.resize(1200, 950)
+        AiKit_UI.setMaximumSize(QtCore.QSize(1200, 950))
         AiKit_UI.setStyleSheet("background-color: rgb(243, 243, 243);")
         self.centralwidget = QtWidgets.QWidget(AiKit_UI)
         self.centralwidget.setObjectName("centralwidget")
@@ -205,6 +205,7 @@ class Ui_AiKit_UI(object):
         self.horizontalLayout_3.setStretch(0, 1)
         self.horizontalLayout_3.setStretch(1, 2)
         self.verticalLayout_8.addWidget(self.widget_2)
+
         self.widget_5 = QtWidgets.QWidget(self.body_left_widget)
         self.widget_5.setObjectName("widget_5")
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout(self.widget_5)
@@ -220,6 +221,7 @@ class Ui_AiKit_UI(object):
         self.control_lab.setObjectName("control_lab")
         self.horizontalLayout_4.addWidget(self.control_lab)
         self.verticalLayout_8.addWidget(self.widget_5)
+
         self.widget_6 = QtWidgets.QWidget(self.body_left_widget)
         self.widget_6.setMaximumSize(QtCore.QSize(16777215, 50))
         self.widget_6.setStyleSheet("background-color: rgb(236, 240, 241);")
@@ -520,6 +522,8 @@ class Ui_AiKit_UI(object):
         self.gridLayout_2.addWidget(self.zoffset_edit, 0, 5, 1, 1)
         self.verticalLayout_6.addWidget(self.widget_17)
         self.verticalLayout_8.addWidget(self.widget_10)
+
+        # 算法
         self.widget_18 = QtWidgets.QWidget(self.body_left_widget)
         self.widget_18.setObjectName("widget_18")
         self.horizontalLayout_13 = QtWidgets.QHBoxLayout(self.widget_18)
@@ -534,6 +538,8 @@ class Ui_AiKit_UI(object):
         self.algorithm_lab2.setObjectName("algorithm_lab2")
         self.horizontalLayout_13.addWidget(self.algorithm_lab2)
         self.verticalLayout_8.addWidget(self.widget_18)
+
+        # 选择
         self.widget_11 = QtWidgets.QWidget(self.body_left_widget)
         self.widget_11.setMaximumSize(QtCore.QSize(16777215, 45))
         self.widget_11.setStyleSheet("background-color: rgb(236, 240, 241);")
@@ -565,6 +571,106 @@ class Ui_AiKit_UI(object):
         self.horizontalLayout_14.setStretch(0, 1)
         self.horizontalLayout_14.setStretch(1, 2)
         self.verticalLayout_8.addWidget(self.widget_11)
+
+        # 颜色
+        # 选择
+        self.widget_50 = QtWidgets.QWidget(self.body_left_widget)
+        self.widget_50.setMaximumSize(QtCore.QSize(16777215, 45))
+        self.widget_50.setStyleSheet("background-color: rgb(236, 240, 241);")
+        self.widget_50.setObjectName("widget_50")
+        self.horizontalLayout_50 = QtWidgets.QHBoxLayout(self.widget_50)
+        self.horizontalLayout_50.setContentsMargins(10, 10, 10, 10)
+        self.horizontalLayout_50.setObjectName("horizontalLayout_50")
+        self.color_lab = QtWidgets.QLabel(self.widget_50)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(11)
+        font.setBold(True)
+        self.color_lab.setFont(font)
+        self.color_lab.setObjectName("color_lab")
+        self.horizontalLayout_50.addWidget(self.color_lab)
+        self.comboBox_color = QtWidgets.QComboBox(self.widget_50)
+        self.comboBox_color.setMinimumSize(QtCore.QSize(0, 25))
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.comboBox_color.setFont(font)
+        self.comboBox_color.setObjectName("comboBox_color")
+        self.comboBox_color.addItem("")
+        self.comboBox_color.addItem("")
+        self.comboBox_color.addItem("")
+        self.horizontalLayout_50.addWidget(self.comboBox_color)
+        self.horizontalLayout_50.setStretch(0, 1)
+        self.horizontalLayout_50.setStretch(1, 2)
+        self.verticalLayout_8.addWidget(self.widget_50)
+
+        # 形状选择
+        self.widget_51 = QtWidgets.QWidget(self.body_left_widget)
+        self.widget_51.setMaximumSize(QtCore.QSize(16777215, 45))
+        self.widget_51.setStyleSheet("background-color: rgb(236, 240, 241);")
+        self.widget_51.setObjectName("widget_51")
+        self.horizontalLayout_51 = QtWidgets.QHBoxLayout(self.widget_51)
+        self.horizontalLayout_51.setContentsMargins(10, 10, 10, 10)
+        self.horizontalLayout_51.setObjectName("horizontalLayout_51")
+        self.shape_lab = QtWidgets.QLabel(self.widget_51)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(11)
+        font.setBold(True)
+        self.shape_lab.setFont(font)
+        self.shape_lab.setObjectName("shape_lab")
+        self.horizontalLayout_51.addWidget(self.shape_lab)
+        self.comboBox_shape = QtWidgets.QComboBox(self.widget_51)
+        self.comboBox_shape.setMinimumSize(QtCore.QSize(0, 25))
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.comboBox_shape.setFont(font)
+        self.comboBox_shape.setObjectName("comboBox_shape")
+        self.comboBox_shape.addItem("")
+        self.comboBox_shape.addItem("")
+        self.comboBox_shape.addItem("")
+        self.comboBox_shape.addItem("")
+        self.horizontalLayout_51.addWidget(self.comboBox_shape)
+        self.horizontalLayout_51.setStretch(0, 1)
+        self.horizontalLayout_51.setStretch(1, 2)
+        self.verticalLayout_8.addWidget(self.widget_51)
+
+        # 调试
+        self.widget_52 = QtWidgets.QWidget(self.body_left_widget)
+        self.widget_52.setObjectName("widget_52")
+        self.horizontalLayout_52 = QtWidgets.QHBoxLayout(self.widget_52)
+        self.horizontalLayout_52.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_52.setObjectName("horizontalLayout_52")
+        self.debug_lab = QtWidgets.QLabel(self.widget_52)
+        self.debug_lab.setMaximumSize(QtCore.QSize(16777215, 22))
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(14)
+        font.setBold(True)
+        self.debug_lab.setFont(font)
+        self.debug_lab.setObjectName("debug_lab")
+        self.horizontalLayout_52.addWidget(self.debug_lab)
+
+        self.debug_btn = QtWidgets.QPushButton(self.widget_52)
+        self.debug_btn.setEnabled(True)
+        self.debug_btn.setMinimumSize(QtCore.QSize(0, 30))
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setBold(True)
+        self.debug_btn.setFont(font)
+        self.debug_btn.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.PointingHandCursor))
+        self.debug_btn.setStyleSheet("background-color: rgb(39, 174, 96);\n"
+                                       "color: rgb(255, 255, 255);\n"
+                                       "border-radius: 7px;\n"
+                                       "border: 2px groove gray;\n"
+                                       "border-style: outset;")
+        self.debug_btn.setAutoDefault(False)
+        self.debug_btn.setDefault(False)
+        self.debug_btn.setFlat(False)
+        self.debug_btn.setObjectName("debug_btn")
+        self.horizontalLayout_52.addWidget(self.debug_btn)
+        self.verticalLayout_8.addWidget(self.widget_52)
+
+
         self.widget_19 = QtWidgets.QWidget(self.body_left_widget)
         self.widget_19.setStyleSheet("background-color: rgb(236, 240, 241);")
         self.widget_19.setObjectName("widget_19")
@@ -584,6 +690,8 @@ class Ui_AiKit_UI(object):
         self.verticalLayout_7.setStretch(0, 3)
         self.verticalLayout_8.addWidget(self.widget_19)
         self.horizontalLayout.addWidget(self.body_left_widget)
+
+        # 右边
         self.body_right_widget = QtWidgets.QWidget(self.body_widget)
         self.body_right_widget.setStyleSheet("")
         self.body_right_widget.setObjectName("body_right_widget")
@@ -797,7 +905,7 @@ class Ui_AiKit_UI(object):
     def retranslateUi(self, AiKit_UI):
         _translate = QtCore.QCoreApplication.translate
         AiKit_UI.setWindowTitle(_translate("AiKit_UI", "MainWindow"))
-        self.title.setText(_translate("AiKit_UI", "Elephant Robotics AI Kits 3D"))
+        self.title.setText(_translate("AiKit_UI", "Robotics AI Kits"))
         self.connect_lab.setText(_translate("AiKit_UI", "Connection"))
         self.connect_btn.setText(_translate("AiKit_UI", "CONNECT"))
         self.port_lab.setText(_translate("AiKit_UI", "Serial Port"))

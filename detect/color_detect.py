@@ -98,3 +98,6 @@ class ColorDetector:
 
     def get_rect(self, res: DetectResult):
         return res.corners
+
+    def get_type(self, res: DetectResult) -> str:
+        return res.color

@@ -17,10 +17,11 @@ import cv2
 import numpy as np
 import serial
 import serial.tools.list_ports
+from PyQt6 import QtCore
 from PyQt6.QtCore import Qt, pyqtSlot, QDateTime, QRegularExpression, QThread, pyqtSignal
 from PyQt6.QtGui import QPixmap, QRegularExpressionValidator, QImage
 from PyQt6.QtWidgets import QMainWindow, QWidget, QApplication, QMessageBox
-from pymycobot import MechArm,MyCobot
+from pymycobot import MechArm, MyCobot
 
 from Utils.coord_calc import CoordCalc
 
@@ -35,6 +36,7 @@ from detect.color_detect import ColorDetector
 from detect.yolov8_detect import YOLODetector
 from ObbrecCamera import ObbrecCamera
 from Utils.crop_tools import crop_frame, crop_poly
+from typing import Union
 
 
 class AiKit_App(AiKit_window, QMainWindow, QWidget):
@@ -64,9 +66,17 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         self.current_coord_btn.clicked.connect(self.get_current_coords_btn)
         self.image_coord_btn.clicked.connect(self.get_img_coords_btn)
         self.open_camera_btn.clicked.connect(self.camera_checked)
+
+        # 绑定函数
+        self.comboBox_color.highlighted.connect(self.choose_color)
+        self.comboBox_color.activated.connect(self.choose_color)
+        self.comboBox_shape.highlighted.connect(self.choose_shape)
+        self.comboBox_shape.activated.connect(self.choose_shape)
+        self.debug_btn.clicked.connect(self.debug_func)
+
         self.add_support_robot_types()
         # self.M5 = ['mechArm 270 for M5']
-        self.M5=['myCobot 280 for M5']
+        self.M5 = ['myCobot 280 for M5']
         self.mc = None
         self.port_list = []
         self.logger = MyLogging().logger
@@ -95,6 +105,11 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         self.color_frame = None
         self.depth_frame = None
         self.algorithm_mode = None
+        self.algorithm_color = None
+        self.algorithm_shape = None
+        self.algorithm_color_show = None
+        self.algorithm_shape_show = None
+        self.debug_on = False
         self.open_camera = None
         self.detect_thread = None
         self.show_camera_lab_depth.hide()
@@ -109,6 +124,8 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         self.algorithm_gripper = ['Color recognition gripper', 'yolov8 gripper', '颜色识别 夹爪', 'yolov8 夹爪']
         self._init_main_window()
         self.choose_function()
+        self.choose_color()
+        self.choose_shape()
         self.get_serial_port_list()
         self.baud_choose()
         self.init_btn_status(False)
@@ -320,6 +337,28 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
             self.show_camera_lab_depth.setText("相机深度画面")
             self.show_camera_lab_rgb.setText("相机彩色画面")
 
+            # 显示颜色文本，隐藏语言切换按钮，隐藏logo
+            self.color_lab.setText("颜色")
+            self.comboBox_color.setItemText(0, "红色")
+            self.comboBox_color.setItemText(1, "绿色")
+            self.comboBox_color.setItemText(2, "蓝色")
+
+            self.shape_lab.setText("形状")
+            self.comboBox_shape.setItemText(0, "矩形")
+            self.comboBox_shape.setItemText(1, "正方形")
+            self.comboBox_shape.setItemText(2, "圆形")
+            self.comboBox_shape.setItemText(3, "三角形")
+
+            self.debug_lab.setText("调试")
+            self.debug_btn.setText("调试")
+
+            self.language_btn.hide()
+            self.logo_lab.hide()
+
+            # 更改标题
+            _translate = QtCore.QCoreApplication.translate
+            self.title.setText(_translate("AiKit_UI", "机械臂控制"))
+
     def init_btn_status(self, status):
         """
         初始化各个按钮的状态
@@ -359,6 +398,26 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         try:
             self.algorithm_mode = self.comboBox_function.currentText()
             self.algorithm_lab.setText(self.algorithm_mode)
+            if "颜色" in self.algorithm_mode:
+                self.algorithm_color_show = self.comboBox_color.currentText()
+                if self.algorithm_color_show == "红色":
+                    self.algorithm_color = "red"
+                elif self.algorithm_color_show == "绿色":
+                    self.algorithm_color = "green"
+                elif self.algorithm_color_show == "蓝色":
+                    self.algorithm_color = "blueA"
+                self.algorithm_lab.setText(self.algorithm_mode + "\t识别颜色:" + self.algorithm_color_show)
+            elif "形状" in self.algorithm_mode:
+                self.algorithm_shape_show = self.comboBox_shape.currentText()
+                if self.algorithm_shape_show == "矩形":
+                    self.algorithm_shape = "rectangle"
+                elif self.algorithm_shape_show == "正方形":
+                    self.algorithm_shape = "square"
+                elif self.algorithm_shape_show == "圆形":
+                    self.algorithm_shape = "circle"
+                elif self.algorithm_shape_show == "三角形":
+                    self.algorithm_shape = "triangle"
+                self.algorithm_lab.setText(self.algorithm_mode + "\t识别形状:" + self.algorithm_shape_show)
             self.xoffset_edit.setEnabled(True)
             self.yoffset_edit.setEnabled(True)
             self.zoffset_edit.setEnabled(True)
@@ -380,6 +439,65 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         except Exception as e:
             e = traceback.format_exc()
             self.logger.error(str(e))
+
+    def choose_color(self):
+        """
+        根据算法下拉框选择显示当前识别颜色
+        Returns: None
+        """
+        try:
+            text = self.comboBox_color.currentText()
+            color = ""
+            if text == "红色":
+                color = "red"
+            elif text == "蓝色":
+                color = "blueA"
+            elif text == "绿色":
+                color = "green"
+            self.algorithm_color = color
+            self.algorithm_color_show = text
+            if "颜色" in self.algorithm_mode:
+                self.algorithm_lab.setText(self.algorithm_mode + "\t识别颜色:" + text)
+        except Exception as e:
+            e = traceback.format_exc()
+            self.logger.error(str(e))
+
+    def choose_shape(self):
+        """
+                根据算法下拉框选择显示当前识别形状
+                Returns: None
+                """
+        try:
+            text = self.comboBox_shape.currentText()
+            shape = ""
+            if text == "矩形":
+                shape = "rectangle"
+            elif text == "正方形":
+                shape = "square"
+            elif text == "圆形":
+                shape = "circle"
+            elif text == "三角形":
+                shape = "triangle"
+
+            self.algorithm_shape = shape
+            self.algorithm_shape_show = text
+            if "形状" in self.algorithm_mode:
+                self.algorithm_lab.setText(self.algorithm_mode + "\t识别形状:" + text)
+        except Exception as e:
+            e = traceback.format_exc()
+            self.logger.error(str(e))
+
+    def debug_func(self):
+        if self.debug_on:
+            self.debug_on = False
+            self.btn_color(self.debug_btn, "green")
+            self.mc.power_on()
+        else:
+            self.debug_on = True
+            self.btn_color(self.debug_btn, "red")
+            self.mc.release_all_servos()
+
+
 
     def get_serial_port_list(self):
         """
@@ -413,14 +531,12 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
             e = traceback.format_exc()
             self.logger.error(str(e))
 
-
     def add_support_robot_types(self):
         """
         增加后续可支持的机型
         """
         self.comboBox_device.clear()
         self.comboBox_device.addItem("myCobot 280 for M5")
-
 
     def baud_choose(self):
         """
@@ -575,8 +691,8 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
             if device in self.M5:
                 self.logger.info(go_home_mes)
                 self.mc.send_angles(arm_idle_angle, 50)
-                time.sleep(3)
-            if self.algorithm_mode in self.algorithm_pump: #for pump
+                time.sleep(1)
+            if self.algorithm_mode in self.algorithm_pump:  # for pump
                 self.mc.set_tool_reference(tool_frame_pump)
                 time.sleep(0.5)
                 self.mc.set_end_type(1)
@@ -584,7 +700,7 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                 pump_off(self.mc)
                 time.sleep(1.5)
             else:
-                self.mc.set_tool_reference(tool_frame_gripper) #for gripper
+                self.mc.set_tool_reference(tool_frame_gripper)  # for gripper
                 time.sleep(0.5)
                 self.mc.set_end_type(1)
                 time.sleep(1)
@@ -728,9 +844,9 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
             if self.is_discern:
                 self.is_discern = False
                 self.btn_color(self.discern_btn, 'blue')
-                self.stop_thread() # a flag
-                self.open_camera.release() #release camera
-                self.detect_thread.join() # wait for the thread stop totally
+                self.stop_thread()  # a flag
+                self.open_camera.release()  # release camera
+                self.detect_thread.join()  # wait for the thread stop totally
                 self.open_camera = None
                 self.is_thread_running = True
                 self.is_open_camera = False
@@ -896,7 +1012,17 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                 if self.is_discern:
                     if self.is_img_coords:
                         self.img_coord_lab.clear()
-                        self.img_coord_lab.setText(str('X: {} Y: {} Z: {}'.format(self.pos_x, self.pos_y, self.pos_z)))
+                        # 将图像坐标转换成机械臂坐标后显示
+                        target_base_pos3d = target_base_pos3d_pump
+                        coords_transformer = CoordCalc(
+                            target_base_pos3d,
+                            (final_frame_size // 2, final_frame_size // 2),
+                            plane_frame_size_ratio,
+                        )
+                        coord = coords_transformer.frame2real(self.pos_x,self.pos_y)
+                        coord = list(coord)
+                        self.img_coord_lab.setText(str('X: {} Y: {} Z: {}'.format(int(coord[0]), int(coord[1]), int(coord[2]))))
+                        # self.img_coord_lab.setText(str('X: {} Y: {} Z: {}'.format(self.pos_x, self.pos_y, self.pos_z)))
                         time.sleep(0.1)
                 else:
                     if self.language == 2:
@@ -926,7 +1052,7 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                 self.open_camera.update_frame()
                 color_frame = self.open_camera.color_frame()
                 depth_frame = self.open_camera.depth_frame()
-                
+
                 if color_frame is None or depth_frame is None:
                     # time.sleep(0.1)
                     continue
@@ -985,20 +1111,38 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                         for obj in res:
                             rect = detector.get_rect(obj)
                             x, y = detector.target_position(obj)
-                            obj_configs.append((rect, (x, y)))
+                            result = detector.get_type(obj)
+                            obj_configs.append((rect, (x, y), result))
                         # pack (depth, pos, angle) together
                         depth_pos_pack = []
                         for obj in obj_configs:
-                            rect, (x, y) = obj
+                            rect, (x, y), result = obj
                             rect = np.array(rect)
                             target_depth_frame = crop_poly(depth_frame, rect)
                             mean_depth = np.sum(target_depth_frame) / np.count_nonzero(
                                 target_depth_frame
                             )
-                            depth_pos_pack.append((mean_depth, (x, y)))
+                            depth_pos_pack.append((mean_depth, (x, y), result))
 
                         # find lowest depth (highest in pile)
-                        depth, (x, y) = min(depth_pos_pack)
+                        # depth, (x, y), _ = min(depth_pos_pack)
+                        # 找出与识别颜色或形状一致的图像
+                        tmp = []
+                        for obj in depth_pos_pack:
+                            _, _, result = obj
+                            if self.algorithm_color == result:
+                                tmp.append(obj)
+                            elif self.algorithm_shape == result:
+                                tmp.append(obj)
+                        if len(tmp) == 0:
+                            tmp.append((0, (0, 0), "none"))
+                        print("识别颜色:", self.algorithm_color_show, self.algorithm_color)
+                        print("识别形状:", self.algorithm_shape_show, self.algorithm_shape)
+                        print("识别结果:")
+                        for _, _, result in tmp:
+                            print(result)
+                        # 按照x，y排序，选最小的
+                        depth, (x, y), _ = min(tmp, key=lambda obj1: (obj1[1][0], obj1[1][1]))
                         if np.isnan(depth):
                             self.logger.error('相机无法正确获取深度信息:{}'.format(depth))
                             continue
@@ -1007,7 +1151,8 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                             z = int(floor_depth - depth)
                             # transform angle from camera frame to arm frame
                             self.pos_x, self.pos_y, self.pos_z = x, y, z
-                            print(f"Raw pos_x,pos_y,pos_z : {self.pos_x} {self.pos_y} {self.pos_z}") #todo open for detect1
+                            print(
+                                f"Raw pos_x,pos_y,pos_z : {self.pos_x} {self.pos_y} {self.pos_z}")  # todo open for detect1
             self.logger.info('Recognition has stopped....')
 
         else:
@@ -1188,9 +1333,9 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
 
         """
         try:
-            self.choose_function()
             self.algorithm_mode = self.comboBox_function.currentText()
-            if self.algorithm_mode in ['颜色识别 吸泵', 'Color recognition pump', '形状识别 吸泵', 'Shape recognition pump',
+            if self.algorithm_mode in ['颜色识别 吸泵', 'Color recognition pump', '形状识别 吸泵',
+                                       'Shape recognition pump',
                                        '颜色识别 夹爪',
                                        'Color recognition gripper']:
                 self.display_open_camera_1(detector)
@@ -1208,7 +1353,6 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
         """
         try:
             if self.is_discern:
-                # self.choose_function()
                 self.algorithm_mode = self.comboBox_function.currentText()
 
                 self.offset_x = int(self.xoffset_edit.text())
@@ -1336,19 +1480,20 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                 coord = list(coord)
                 # adjust final offset
                 off_x, off_y, off_z = (self.offset_x, self.offset_y, self.offset_z)
-                if self.algorithm_mode in ['颜色识别 吸泵', 'Color recognition pump', '形状识别 吸泵', 'Shape recognition pump']:
+                if self.algorithm_mode in ['颜色识别 吸泵', 'Color recognition pump', '形状识别 吸泵',
+                                           'Shape recognition pump']:
 
                     coord[0] += final_coord_offset[0] + off_x
                     coord[1] += final_coord_offset[1] + off_y
                     coord[2] += final_coord_offset[2] + off_z + self.pos_z
 
                     coord.extend([-177, 0, -75])
-                    
+
                     target_xy_pos3d = coord.copy()[:3]
                     target_xy_pos3d[2] = 50
                     # 运动至物体上方
                     self.logger.info('X-Y move: {}'.format(target_xy_pos3d))
-            
+
                     position_move(self.mc, *target_xy_pos3d)
                     time.sleep(4)
                     # 运动至物体表面
@@ -1359,11 +1504,10 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                     coord[0] += final_coord_offset[0] + off_x + 5
                     coord[1] += final_coord_offset[1] + off_y
                     coord[2] += final_coord_offset[2] + self.pos_z - 20 + off_z
-          
+
                     coord.extend([-177, 0, -75])
                     coord_xy = coord.copy()[:3]
                     coord_xy[2] = 50
-
 
                     # self.mc.send_coords(coord_xy, 50)
                     # 运行至物体上方
@@ -1374,7 +1518,8 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                     self.logger.info('Target move: {}'.format(coord))
                     self.mc.send_coords(coord, 40, 0)
                     time.sleep(4)
-                elif self.algorithm_mode in ['yolov8 gripper', 'yolov8 夹爪', '颜色识别 夹爪', 'Color recognition gripper']:
+                elif self.algorithm_mode in ['yolov8 gripper', 'yolov8 夹爪', '颜色识别 夹爪',
+                                             'Color recognition gripper']:
                     angle = 0
                     coord[0] += final_coord_offset[0] + off_x
                     coord[1] += final_coord_offset[1] + off_y
@@ -1401,7 +1546,7 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                     open_gripper(self.mc)
                     time.sleep(3)
                     # self.mc.send_coords(coord, 40, 1)
-                    self.mc.send_coord(3,20,50)
+                    self.mc.send_coord(3, 20, 50)
                     time.sleep(3)
                     close_gripper(self.mc)
                     time.sleep(3)
@@ -1582,6 +1727,7 @@ if __name__ == '__main__':
         print(libraries_path)
         app = QApplication(sys.argv)
         AiKit_window = AiKit_App()
+        AiKit_window.set_language()
         AiKit_window.show()
     except Exception as e:
         e = traceback.format_exc()
