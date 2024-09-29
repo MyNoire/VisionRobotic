@@ -14,14 +14,14 @@ git clone https://github.com/fellow-z/VisionRobotic.git
 # Use
 
 ```angular2html
-cd AiKit_3D_UI
+cd VisionRobotic
 pip install -r requirements.txt
 ```
 
 # Run
 
 ```angular2html
-cd AiKit_3D_UI
+cd VisionRobotic
 
 python main.py
 ```
