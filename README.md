@@ -8,7 +8,7 @@ Windows 10 or Windows 11 + python3.9 + pyqt6
 # Install
 
 ```angular2html
-git clone https://github.com/elephantrobotics/AiKit_3D_UI.git
+git clone https://github.com/fellow-z/VisionRobotic.git
 ```
 
 # Use
