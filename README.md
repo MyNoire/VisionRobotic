@@ -18,6 +18,12 @@ cd VisionRobotic
 pip install -r requirements.txt
 ```
 
+# Before Run
+
+```angular2html
+use OrbbecViewer to close camera automatic exposure
+```
+
 # Run
 
 ```angular2html

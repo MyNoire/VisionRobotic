@@ -23,6 +23,7 @@ from PyQt6.QtGui import QPixmap, QRegularExpressionValidator, QImage
 from PyQt6.QtWidgets import QMainWindow, QWidget, QApplication, QMessageBox
 from pymycobot import MechArm, MyCobot
 
+from Utils.colorToUi import colorToUi
 from Utils.coord_calc import CoordCalc
 
 sys.path.append(os.getcwd())
@@ -451,7 +452,9 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
             if text == "红色":
                 color = "red"
             elif text == "蓝色":
-                color = "blueA"
+                # color = "blueA" 在相机关闭自动曝光，手动设置曝光值时，识别到的蓝色物品范围在blueB而不是blueA
+                # 设置手动曝光是为了防止识别到背景板
+                color = "blueB"
             elif text == "绿色":
                 color = "green"
             self.algorithm_color = color
@@ -1108,11 +1111,14 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                         self.show_camera_lab_rgb.setPixmap(color_pixmap)
                         # interpret result
                         obj_configs = []
+                        i = 0
                         for obj in res:
                             rect = detector.get_rect(obj)
                             x, y = detector.target_position(obj)
                             result = detector.get_type(obj)
                             obj_configs.append((rect, (x, y), result))
+                            #self.comboBox_color.setItemText(i,colorToUi(result)) 备选方案根据识别到的颜色更新下拉框
+                            i += 1
                         # pack (depth, pos, angle) together
                         depth_pos_pack = []
                         for obj in obj_configs:
