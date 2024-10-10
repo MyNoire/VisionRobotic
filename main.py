@@ -1136,9 +1136,9 @@ class AiKit_App(AiKit_window, QMainWindow, QWidget):
                         tmp = []
                         for obj in depth_pos_pack:
                             _, _, result = obj
-                            if self.algorithm_color == result:
+                            if self.algorithm_color == result and self.algorithm_mode == '颜色识别 吸泵':
                                 tmp.append(obj)
-                            elif self.algorithm_shape == result:
+                            elif self.algorithm_shape == result and self.algorithm_mode == '形状识别 吸泵':
                                 tmp.append(obj)
                         if len(tmp) == 0:
                             tmp.append((0, (0, 0), "none"))

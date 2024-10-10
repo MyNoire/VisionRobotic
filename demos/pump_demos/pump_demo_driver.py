@@ -23,7 +23,7 @@ coords_transformer = CoordCalc(
 plist = get_port_list()
 # print(plist)
 
-arm = MyCobot(plist[0])
+arm = MyCobot(plist[4])
 
 
 def driver(detector, offset_3d=(0, 0, 0)):
