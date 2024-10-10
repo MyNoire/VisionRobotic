@@ -39,39 +39,48 @@ class ShapeDetector:
         x = 0
         y = 0
 
-        # filter out low bright pixel
-        Alpha = 20
-        Gamma = -120 * 20
-        cal = cv2.addWeighted(frame, Alpha, frame, 0, Gamma)
-
+        # # filter out low bright pixel
+        # Alpha = 20
+        # Gamma = -120 * 20
+        # cal = cv2.addWeighted(frame, Alpha, frame, 0, Gamma)
+        #
+        # # convert to gray scale
         # convert to gray scale
-        gray = cv2.cvtColor(cal, cv2.COLOR_BGR2GRAY)
-
-        # open operation to filter out noise
-        gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, np.ones((3, 3)))
-
-        erosion = cv2.erode(gray, np.ones((2, 2), np.uint8), iterations=2)
-
-        # the image for expansion operation, its role is to deepen the color depth in the picture
-        dilation = cv2.dilate(erosion, np.ones(
-            (1, 1), np.uint8), iterations=2)
-
-        # 设定灰度图的阈值, 把点值统一化
-        _, threshold = cv2.threshold(dilation, 175, 255, cv2.THRESH_BINARY)
-        # 边缘检测
-        edges = cv2.Canny(threshold, 50, 100)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # OTSU阈值
+        ret,thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
         # 检测物体边框
-        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        # 限制检测范围
+        contours = list(
+            filter(lambda x: 5000 < cv2.contourArea(x) < 30000, contours)
+        )
+        # # open operation to filter out noise
+        # gray = cv2.morphologyEx(gray, cv2.MORPH_OPEN, np.ones((3, 3)))
+        #
+        # erosion = cv2.erode(gray, np.ones((2, 2), np.uint8), iterations=2)
+        #
+        # # the image for expansion operation, its role is to deepen the color depth in the picture
+        # dilation = cv2.dilate(erosion, np.ones(
+        #     (1, 1), np.uint8), iterations=2)
+        #
+        # # 设定灰度图的阈值, 把点值统一化
+        # _, threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        # # 边缘检测
+        # edges = cv2.Canny(threshold, 50, 100)
+        # # 检测物体边框
+        # contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
         # No contour detected
         if len(contours) == 0:
             return None
 
+
         res: List[ShapeDetector.ShapeDetectResult] = []
 
         for cnt in contours:
-            if cv2.contourArea(cnt) < 13000:
-                continue
+            # if cv2.contourArea(cnt) < 13000 or cv2.contourArea(cnt) > 30000:
+            #     continue
             print('erar:', cv2.contourArea(cnt))
             # PolyDP
             peri = cv2.arcLength(cnt, True)

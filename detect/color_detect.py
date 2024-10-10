@@ -22,6 +22,7 @@ class ColorDetector:
 
     def __init__(self) -> None:
         self.area_low_threshold = 15000
+        self.area_high_max = 30000 #对识别最大区域做出限制，防止识别到背景
         self.detected_name = None
         self.hsv_range = {
             "green": ((40, 50, 50), (90, 256, 256)),
@@ -62,7 +63,7 @@ class ColorDetector:
             )
 
             contours = list(
-                filter(lambda x: cv2.contourArea(x) > self.area_low_threshold, contours)
+                filter(lambda x: self.area_low_threshold < cv2.contourArea(x) < self.area_high_max, contours)
             )
 
             rects = list(map(cv2.minAreaRect, contours))
