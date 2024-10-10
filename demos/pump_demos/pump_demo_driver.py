@@ -2,6 +2,7 @@ import os
 import sys
 
 import numpy as np
+from pymycobot import MyCobot
 from pymycobot.utils import get_port_list
 
 sys.path.append(os.getcwd())
@@ -22,7 +23,7 @@ coords_transformer = CoordCalc(
 plist = get_port_list()
 # print(plist)
 
-arm = MechArm(plist[0])
+arm = MyCobot(plist[4])
 
 
 def driver(detector, offset_3d=(0, 0, 0)):
